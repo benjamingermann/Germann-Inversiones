@@ -28,30 +28,31 @@ const App: React.FC = () => {
   }, []);
 
   // Sincronización de Dólares (API Gratuita estable)
+  const fetchDollars = async () => {
+    try {
+      const response = await fetch('https://dolarapi.com/v1/dolares');
+      const data = await response.json();
+      const rates: DollarRates = {
+        oficial: data.find((d: any) => d.casa.toLowerCase().includes('oficial')),
+        blue: data.find((d: any) => d.casa.toLowerCase().includes('blue')),
+        mep: data.find((d: any) => d.casa.toLowerCase().includes('mep')),
+        ccl: data.find((d: any) => d.casa.toLowerCase().includes('contadoconliqui') || d.casa.toLowerCase().includes('ccl')),
+      };
+      setDollarRates(rates);
+    } catch (error) {
+      console.error("Error fetching dollars:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchDollars = async () => {
-      try {
-        const response = await fetch('https://dolarapi.com/v1/dolares');
-        const data = await response.json();
-        const rates: DollarRates = {
-          oficial: data.find((d: any) => d.casa === 'oficial'),
-          blue: data.find((d: any) => d.casa === 'blue'),
-          mep: data.find((d: any) => d.casa === 'mep'),
-          ccl: data.find((d: any) => d.casa === 'contadoconliqui'),
-        };
-        setDollarRates(rates);
-      } catch (error) {
-        console.error("Error fetching dollars:", error);
-      }
-    };
     fetchDollars();
-    const interval = setInterval(fetchDollars, 60000);
+    const interval = setInterval(fetchDollars, 300000); // Cada 5 minutos
     return () => clearInterval(interval);
   }, []);
 
   // Sincronización de precios con IA
   const syncRealPrices = useCallback(async () => {
-    if (assets.length === 0) return;
+    if (assets.length === 0 || isSyncing) return;
     setIsSyncing(true);
     const symbols = assets.map(a => a.symbol);
     try {
@@ -59,7 +60,8 @@ const App: React.FC = () => {
       if (updates && updates.length > 0) {
         setAssets(prev => prev.map(asset => {
           const update = updates.find(u => u.symbol.toUpperCase() === asset.symbol.toUpperCase());
-          return update ? { ...asset, price: update.price } : asset;
+          // Solo actualizamos si el precio es mayor a 0 para no sobreescribir con errores
+          return (update && update.price > 0) ? { ...asset, price: update.price } : asset;
         }));
       }
     } catch (e) {
@@ -67,13 +69,15 @@ const App: React.FC = () => {
     } finally {
       setIsSyncing(false);
     }
-  }, [assets.length]);
+  }, [assets.length, isSyncing]);
 
+  // AUTO-SYNC: Si hay activos con precio 0, intentar sincronizar inmediatamente
   useEffect(() => {
-    if (currentScreen === 'DASHBOARD' && !isSyncing && assets.length > 0) {
+    const hasUnpricedAssets = assets.some(a => a.price === 0);
+    if (hasUnpricedAssets && !isSyncing && assets.length > 0) {
       syncRealPrices();
     }
-  }, [currentScreen]);
+  }, [assets, isSyncing, syncRealPrices]);
 
   // Persistencia local permanente
   useEffect(() => {

@@ -7,8 +7,7 @@ export interface PriceUpdate {
 }
 
 export const fetchRealPrices = async (symbols: string[]): Promise<PriceUpdate[]> => {
-  if (!process.env.API_KEY) {
-    console.warn("API_KEY no detectada para sincronización de precios.");
+  if (!process.env.API_KEY || symbols.length === 0) {
     return [];
   }
 
@@ -16,15 +15,18 @@ export const fetchRealPrices = async (symbols: string[]): Promise<PriceUpdate[]>
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
-      contents: `ACTUALIZACIÓN DE MERCADO REAL-TIME. 
-      Símbolos a consultar: ${symbols.join(", ")}.
+      contents: `Consulta de precios bursátiles en tiempo real.
+      Símbolos: ${symbols.join(", ")}.
       
-      REGLAS ESTRICTAS DE VALORACIÓN:
-      1. ADRs Argentinos (YPF, GGAL, BMA, EDN): Si el usuario los tiene en mercado 'US', busca el precio en el NYSE en DÓLARES (ej. YPF suele estar entre 25-35 USD, GGAL entre 40-60 USD).
-      2. Acciones locales (YPFD.BA, GGAL.BA): Si el mercado es ARG, busca el precio en el BYMA en PESOS ARGENTINOS (ej. YPFD suele estar en los 30.000+ ARS).
-      3. Stocks USA (AAPL, TSLA, NVDA): Precio en USD. NVDA debe ser post-split (~120-150 USD).
+      INSTRUCCIONES CRÍTICAS:
+      1. ADRs (YPF, GGAL, BMA): Si son de Wall Street (NYSE), dame el precio en DÓLARES (u$s). 
+         YPF suele estar entre 25 y 40 u$s. GGAL entre 40 y 65 u$s.
+      2. Acciones locales (YPFD, GGAL): Si son de Argentina, dame el precio en PESOS (ARS). 
+         YPFD suele estar en ~30.000+ pesos.
+      3. NVDA, AAPL, MSFT: Precio en u$s (Wall Street).
       
-      Devuelve SOLO un objeto JSON con este formato: { "prices": [{ "symbol": string, "price": number }] }`,
+      Responde EXCLUSIVAMENTE con este formato JSON:
+      { "prices": [{ "symbol": "YPF", "price": 31.45 }] }`,
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",

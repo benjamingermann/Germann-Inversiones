@@ -44,9 +44,11 @@ const AssetIcon = ({ asset }: { asset: Asset }) => {
 };
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, onAssetClick, onAddMoney, isSyncing }) => {
-  const mepRate = dollarRates.mep?.venta || 1200;
+  // Usar un fallback razonable para el MEP si la API tarda
+  const mepRate = dollarRates.mep?.venta || dollarRates.blue?.venta || 1200;
   
   const totalValueUSD = assets.reduce((sum, asset) => {
+    if (asset.price <= 0) return sum;
     const assetValue = asset.price * asset.quantity;
     return sum + (asset.market === 'ARG' ? assetValue / mepRate : assetValue);
   }, 0);
@@ -67,7 +69,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
           )}
           <button 
             onClick={onAddMoney}
-            className={`w-12 h-12 rounded-full bg-surface-dark border border-white/5 flex items-center justify-center text-white hover:bg-surface-highlight transition-all active:scale-90 ${isSyncing ? 'opacity-50' : ''}`}
+            disabled={isSyncing}
+            className={`w-12 h-12 rounded-full bg-surface-dark border border-white/5 flex items-center justify-center text-white hover:bg-surface-highlight transition-all active:scale-90 ${isSyncing ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <span className={`material-symbols-outlined text-2xl ${isSyncing ? 'animate-spin' : ''}`}>sync</span>
           </button>
@@ -86,7 +89,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
                   {totalValueUSD.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </h2>
               </div>
-              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Calculado a Dólar MEP (${mepRate})</p>
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest italic">Calculado a Dólar MEP (${mepRate.toLocaleString('es-AR')})</p>
             </section>
 
             <section 
@@ -129,7 +132,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
                     <div>
                       <p className="font-black text-white text-xl leading-none mb-1.5">{asset.symbol}</p>
                       <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
-                         {asset.quantity} acciones • {asset.market === 'US' ? 'NYSE' : 'BCBA'}
+                         {asset.quantity.toLocaleString('es-AR')} acciones • {asset.market === 'US' ? 'NYSE' : 'BCBA'}
                       </p>
                     </div>
                   </div>
@@ -137,10 +140,18 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
                     <div className="flex items-baseline justify-end gap-1.5 mb-1">
                       <span className="text-[10px] font-black text-gray-500 uppercase">{asset.market === 'US' ? 'USD' : 'ARS'}</span>
                       <p className="font-black text-white text-2xl tabular-nums tracking-tighter">
-                        {asset.price > 0 ? asset.price.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '...'}
+                        {asset.price > 0 ? (
+                          asset.price.toLocaleString('es-AR', { minimumFractionDigits: 2 })
+                        ) : (
+                          <span className="flex items-center gap-1 opacity-50 animate-pulse">
+                            Cargando...
+                          </span>
+                        )}
                       </p>
                     </div>
-                    <div className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Precio Hoy</div>
+                    <div className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">
+                      {asset.price > 0 ? 'Precio Hoy' : 'Consultando IA'}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -168,7 +179,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
                 { label: 'Dólar MEP', data: dollarRates.mep, icon: 'trending_up', color: 'text-primary' },
                 { label: 'Dólar CCL', data: dollarRates.ccl, icon: 'account_balance', color: 'text-purple-400' }
               ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-5 bg-background-dark/40 rounded-2xl border border-white/5 group shadow-sm">
+                <div key={i} className="flex items-center justify-between p-5 bg-background-dark/40 rounded-2xl border border-white/5 group shadow-sm transition-colors hover:bg-white/[0.03]">
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-full bg-surface-dark flex items-center justify-center border border-white/5 ${item.color}`}>
                       <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
@@ -176,7 +187,9 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
                     <span className="text-sm font-bold text-gray-300">{item.label}</span>
                   </div>
                   <div className="text-right">
-                    <p className="font-black text-white tabular-nums text-lg">${item.data?.venta || '...'}</p>
+                    <p className="font-black text-white tabular-nums text-lg">
+                      {item.data?.venta ? `$${item.data.venta.toLocaleString('es-AR')}` : '...'}
+                    </p>
                     <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Venta</p>
                   </div>
                 </div>
@@ -187,13 +200,14 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
           <section className="bg-gradient-to-br from-primary/10 to-transparent p-10 rounded-[2.5rem] border border-primary/10 relative overflow-hidden">
             <h3 className="text-white text-xl font-black mb-4 tracking-tight">Consejo IA</h3>
             <p className="text-sm text-gray-400 leading-relaxed mb-8 font-medium italic">
-              "Para activos como YPF, es vital mirar el gráfico de NYSE para entender la tendencia global antes de operar en pesos localmente."
+              "Papá, para activos como YPF, es vital mirar el gráfico de NYSE para entender la tendencia global antes de operar en pesos localmente."
             </p>
             <button 
-              onClick={() => window.location.reload()}
-              className="w-full py-4 bg-primary text-background-dark font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all"
+              onClick={onAddMoney}
+              disabled={isSyncing}
+              className="w-full py-4 bg-primary text-background-dark font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all disabled:opacity-50"
             >
-              Actualizar Precios
+              {isSyncing ? 'Sincronizando...' : 'Actualizar Todo'}
             </button>
           </section>
         </div>
