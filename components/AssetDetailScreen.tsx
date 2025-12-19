@@ -13,8 +13,13 @@ const AssetDetailScreen: React.FC<AssetDetailScreenProps> = ({ asset, onBack }) 
   const [isLoaded, setIsLoaded] = useState(false);
 
   const getTVSymbol = (symbol: string, market: string) => {
-    if (market === 'ARG') return `BCBA:${symbol}`;
-    return `NASDAQ:${symbol}`;
+    const s = symbol.toUpperCase();
+    // Forzamos NYSE para YPF y otros ADRs si el usuario los sigue de forma global
+    if (s === 'YPF' || s === 'GGAL' || s === 'BMA' || s === 'PAM' || s === 'EDN') {
+        return `NYSE:${s}`;
+    }
+    if (market === 'ARG') return `BCBA:${s}`;
+    return `NASDAQ:${s}`;
   };
 
   useEffect(() => {
@@ -58,40 +63,36 @@ const AssetDetailScreen: React.FC<AssetDetailScreenProps> = ({ asset, onBack }) 
           >
             <span className="material-symbols-outlined text-3xl">arrow_back</span>
           </button>
-          <h2 className="text-white text-2xl font-black tracking-tight">{asset.symbol}</h2>
+          <div className="text-center">
+            <h2 className="text-white text-2xl font-black tracking-tight leading-none">{asset.symbol}</h2>
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
+                {asset.market === 'US' ? 'NYSE / NASDAQ' : 'BYMA Argentina'}
+            </p>
+          </div>
           <div className="size-12 flex items-center justify-end">
              <span className="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_10px_#13ec5b]"></span>
           </div>
         </div>
-        <span className="text-[12px] font-black text-primary uppercase tracking-[0.2em] mb-2">MERCADO ABIERTO</span>
       </header>
 
       <main className="px-6 max-w-4xl mx-auto w-full pt-10">
         <div className="text-center mb-12">
-          <h3 className="text-gray-500 text-lg font-bold uppercase tracking-widest mb-4">{asset.name}</h3>
-          <div className="flex items-center justify-center gap-3">
-            <span className="text-4xl text-gray-500 font-bold mb-2">u$s</span>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <span className="text-3xl text-gray-500 font-bold uppercase">{asset.market === 'US' ? 'u$s' : '$'}</span>
             <h1 className="text-7xl font-black tracking-tighter text-white tabular-nums leading-none">
-              {asset.price.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+              {asset.price > 0 ? asset.price.toLocaleString('es-AR', { minimumFractionDigits: 2 }) : '...'}
             </h1>
           </div>
-          
-          <div className="flex justify-center mt-6">
-            <div className={`flex items-center gap-2 px-6 py-2.5 rounded-full font-black text-lg ${asset.change > 0 ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
-              <span className="material-symbols-outlined font-black">{asset.change > 0 ? 'arrow_upward' : 'arrow_downward'}</span>
-              {Math.abs(asset.change).toFixed(2)}%
-            </div>
-          </div>
+          <p className="text-gray-500 text-sm font-bold uppercase tracking-[0.2em]">{asset.name}</p>
         </div>
 
-        {/* Chart */}
         <section className="mb-12 relative">
           <div className="relative bg-surface-dark border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl h-[450px] lg:h-[550px]">
              {!isLoaded && (
                <div className="absolute inset-0 flex items-center justify-center bg-surface-dark z-10">
                  <div className="flex flex-col items-center gap-4">
                    <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                   <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Sincronizando Mercado...</p>
+                   <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Cargando Gráfico Global...</p>
                  </div>
                </div>
              )}
@@ -99,13 +100,12 @@ const AssetDetailScreen: React.FC<AssetDetailScreenProps> = ({ asset, onBack }) 
           </div>
         </section>
 
-        {/* Metrics Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {[
             { label: 'Tus Acciones', val: `${asset.quantity}u` },
-            { label: 'Valor Cartera', val: `${asset.market === 'US' ? 'u$s' : '$'} ${(asset.quantity * asset.price).toLocaleString('es-AR', { maximumFractionDigits: 0 })}`, color: 'text-primary' },
-            { label: 'Rend. 24h', val: `${asset.change > 0 ? '+' : ''}${asset.change.toFixed(2)}%`, color: asset.change > 0 ? 'text-primary' : 'text-red-500' },
-            { label: 'Volumen', val: 'ALTO' }
+            { label: 'Tu Capital', val: `${asset.market === 'US' ? 'u$s' : '$'} ${(asset.quantity * asset.price).toLocaleString('es-AR', { maximumFractionDigits: 0 })}`, color: 'text-primary' },
+            { label: 'Mercado', val: asset.market === 'US' ? 'Exterior' : 'Local' },
+            { label: 'Estado', val: 'Activo' }
           ].map((m, i) => (
             <div key={i} className="bg-surface-dark/40 p-6 rounded-3xl border border-white/5">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">{m.label}</p>
@@ -114,18 +114,16 @@ const AssetDetailScreen: React.FC<AssetDetailScreenProps> = ({ asset, onBack }) 
           ))}
         </div>
 
-        {/* News Feed */}
-        <h3 className="text-white text-xl font-black mb-6 px-2">Análisis de {asset.symbol}</h3>
+        <h3 className="text-white text-xl font-black mb-6 px-2 italic">Noticias Relacionadas</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {NEWS_ITEMS.map(news => (
             <div key={news.id} className="flex gap-4 p-5 bg-surface-dark/20 rounded-[2rem] border border-white/5 hover:bg-surface-dark/40 transition-all cursor-pointer group">
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold text-sky-400 uppercase mb-2">{news.time} • {news.source}</p>
+                <p className="text-[10px] font-bold text-primary/60 uppercase mb-2">{news.time} • {news.source}</p>
                 <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors leading-relaxed line-clamp-2">
                   {news.title}
                 </h4>
               </div>
-              <img src={news.imageUrl} className="size-16 rounded-2xl object-cover opacity-60 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all" alt="" />
             </div>
           ))}
         </div>

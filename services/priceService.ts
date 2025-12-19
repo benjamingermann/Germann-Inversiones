@@ -16,12 +16,15 @@ export const fetchRealPrices = async (symbols: string[]): Promise<PriceUpdate[]>
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
-      contents: `Sincronización de precios del mercado hoy. Obtén el precio de cotización REAL Y ACTUAL para: ${symbols.join(", ")}. 
-      REGLAS CRÍTICAS DE PRECIO: 
-      - NVDA: Debe ser el precio POST-SPLIT (aprox $120-$160 USD). Si ves algo de $400+, está MAL.
-      - Para activos de Argentina (GGAL, YPFD, etc): Precio en ARS (Pesos).
-      - Para activos de USA: Precio en USD (Dólares).
-      Formato de respuesta estrictamente JSON: { "prices": [{ "symbol": string, "price": number }] }.`,
+      contents: `ACTUALIZACIÓN DE MERCADO REAL-TIME. 
+      Símbolos a consultar: ${symbols.join(", ")}.
+      
+      REGLAS ESTRICTAS DE VALORACIÓN:
+      1. ADRs Argentinos (YPF, GGAL, BMA, EDN): Si el usuario los tiene en mercado 'US', busca el precio en el NYSE en DÓLARES (ej. YPF suele estar entre 25-35 USD, GGAL entre 40-60 USD).
+      2. Acciones locales (YPFD.BA, GGAL.BA): Si el mercado es ARG, busca el precio en el BYMA en PESOS ARGENTINOS (ej. YPFD suele estar en los 30.000+ ARS).
+      3. Stocks USA (AAPL, TSLA, NVDA): Precio en USD. NVDA debe ser post-split (~120-150 USD).
+      
+      Devuelve SOLO un objeto JSON con este formato: { "prices": [{ "symbol": string, "price": number }] }`,
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",

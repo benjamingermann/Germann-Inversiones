@@ -8,20 +8,26 @@ import MarketsScreen from './components/MarketsScreen';
 import BottomNav from './components/BottomNav';
 import Sidebar from './components/Sidebar';
 import { Screen, Asset, DollarRates } from './types';
-import { INITIAL_ASSETS } from './constants';
 import { fetchRealPrices } from './services/priceService';
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('WELCOME');
   const [isSyncing, setIsSyncing] = useState(false);
   const [assets, setAssets] = useState<Asset[]>(() => {
-    const saved = localStorage.getItem('germann_assets');
-    return saved ? JSON.parse(saved) : INITIAL_ASSETS;
+    const saved = localStorage.getItem('germann_assets_v2');
+    return saved ? JSON.parse(saved) : [];
   });
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [dollarRates, setDollarRates] = useState<DollarRates>({});
 
-  // Sincronización de Dólares
+  // Saltear bienvenida si ya tiene acciones
+  useEffect(() => {
+    if (assets.length > 0 && currentScreen === 'WELCOME') {
+      setCurrentScreen('DASHBOARD');
+    }
+  }, []);
+
+  // Sincronización de Dólares (API Gratuita estable)
   useEffect(() => {
     const fetchDollars = async () => {
       try {
@@ -43,75 +49,44 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // SINCRONIZACIÓN DE PRECIOS REALES (Gemini Search)
+  // Sincronización de precios con IA
   const syncRealPrices = useCallback(async () => {
     if (assets.length === 0) return;
     setIsSyncing(true);
     const symbols = assets.map(a => a.symbol);
-    const updates = await fetchRealPrices(symbols);
-    
-    if (updates.length > 0) {
-      setAssets(prev => prev.map(asset => {
-        const update = updates.find(u => u.symbol.toUpperCase() === asset.symbol.toUpperCase());
-        return update ? { ...asset, price: update.price } : asset;
-      }));
+    try {
+      const updates = await fetchRealPrices(symbols);
+      if (updates && updates.length > 0) {
+        setAssets(prev => prev.map(asset => {
+          const update = updates.find(u => u.symbol.toUpperCase() === asset.symbol.toUpperCase());
+          return update ? { ...asset, price: update.price } : asset;
+        }));
+      }
+    } catch (e) {
+      console.error("Sync failed", e);
+    } finally {
+      setIsSyncing(false);
     }
-    setIsSyncing(false);
   }, [assets.length]);
 
-  // Sincronizar al iniciar el Dashboard
   useEffect(() => {
-    if (currentScreen === 'DASHBOARD' && !isSyncing) {
+    if (currentScreen === 'DASHBOARD' && !isSyncing && assets.length > 0) {
       syncRealPrices();
     }
   }, [currentScreen]);
 
-  // Sincronización periódica cada 5 minutos
+  // Persistencia local permanente
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL') {
-        syncRealPrices();
-      }
-    }, 300000); 
-    return () => clearInterval(interval);
-  }, [currentScreen, syncRealPrices]);
-
-  useEffect(() => {
-    localStorage.setItem('germann_assets', JSON.stringify(assets));
+    localStorage.setItem('germann_assets_v2', JSON.stringify(assets));
   }, [assets]);
 
-  // MOTOR DE MOVIMIENTO "LIVE" (Micro-fluctuaciones entre syncs reales)
-  useEffect(() => {
-    if (currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL' || currentScreen === 'MARKETS') {
-      const interval = setInterval(() => {
-        setAssets(prevAssets => 
-          prevAssets.map(asset => {
-            // Fluctuación muy pequeña para simular mercado vivo (0.01% max)
-            const changeFactor = 1 + (Math.random() * 0.0002 - 0.0001);
-            return {
-              ...asset,
-              price: Number((asset.price * changeFactor).toFixed(2)),
-              change: Number((asset.change + (changeFactor - 1) * 10).toFixed(2))
-            };
-          })
-        );
-      }, 4000);
-      return () => clearInterval(interval);
-    }
-  }, [currentScreen]);
-
-  useEffect(() => {
-    if (selectedAsset) {
-      const updated = assets.find(a => a.id === selectedAsset.id);
-      if (updated) setSelectedAsset(updated);
-    }
-  }, [assets, selectedAsset]);
-
   const handleStart = () => setCurrentScreen('SETUP');
+  
   const handleSavePortfolio = (newAssets: Asset[]) => {
     setAssets(newAssets);
     setCurrentScreen('DASHBOARD');
   };
+
   const handleAssetClick = (asset: Asset) => {
     setSelectedAsset(asset);
     setCurrentScreen('DETAIL');
