@@ -25,7 +25,7 @@ const AssetDetailScreen: React.FC<AssetDetailScreenProps> = ({ asset, onBack }) 
 
   return (
     <div className="flex flex-col min-h-screen bg-background-dark pb-32">
-      <header className="sticky top-0 z-50 flex items-center bg-background-dark/80 backdrop-blur-md p-4 pb-2 justify-between border-b border-white/5">
+      <header className="sticky top-0 z-50 flex items-center bg-background-dark/90 backdrop-blur-xl p-4 pb-2 justify-between border-b border-white/5">
         <button 
           onClick={onBack}
           className="text-white flex size-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
@@ -33,127 +33,93 @@ const AssetDetailScreen: React.FC<AssetDetailScreenProps> = ({ asset, onBack }) 
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
         <div className="flex flex-col items-center">
-          <div className="flex items-center gap-1">
-            <h2 className="text-white text-lg font-bold leading-tight">{asset.symbol}</h2>
-            <span className="bg-primary/10 text-primary text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border border-primary/20">SEGUIMIENTO</span>
-          </div>
+          <h2 className="text-white text-lg font-bold leading-tight">{asset.symbol}</h2>
+          <span className="text-[10px] font-bold text-primary uppercase tracking-tighter">Detalle de Activo</span>
         </div>
-        <button className="flex size-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors">
-          <span className="material-symbols-outlined text-primary filled">visibility</span>
-        </button>
+        <div className="size-10"></div> {/* Spacer */}
       </header>
 
-      <div className="px-5 pt-6 pb-2 text-center">
-        <h3 className="text-slate-400 text-sm font-medium tracking-wide mb-1">{asset.name}</h3>
+      <div className="px-6 pt-8 pb-4 text-center">
+        <h3 className="text-gray-500 text-sm font-bold uppercase tracking-widest mb-2">{asset.name}</h3>
         <div className="flex items-baseline justify-center gap-1">
-          <span className="text-xl text-slate-400 font-medium translate-y-[-4px]">{asset.market === 'US' ? 'US$' : '$'}</span>
-          <h1 className="text-4xl font-bold tracking-tight text-white tabular-nums">{asset.price.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</h1>
+          <span className="text-2xl text-gray-500 font-bold">{asset.market === 'US' ? 'u$s' : '$'}</span>
+          <h1 className="text-5xl font-black tracking-tighter text-white tabular-nums">
+            {asset.price.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+          </h1>
         </div>
-        <div className="flex items-center justify-center gap-2 mt-2 mb-5">
-          <div className={`flex items-center gap-1 ${asset.change > 0 ? 'text-primary' : 'text-red-500'}`}>
+        
+        <div className="flex items-center justify-center gap-3 mt-4">
+          <div className={`flex items-center gap-1 px-3 py-1 rounded-full font-bold text-sm ${asset.change > 0 ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
             <span className="material-symbols-outlined text-sm font-bold">{asset.change > 0 ? 'arrow_upward' : 'arrow_downward'}</span>
-            <span className="text-sm font-bold">{(asset.price * (asset.change/100)).toFixed(2)}</span>
-          </div>
-          <div className={`flex h-6 items-center justify-center rounded-full px-3 ${asset.change > 0 ? 'bg-primary/20 text-primary' : 'bg-red-500/20 text-red-500'}`}>
-            <p className="text-xs font-bold">{asset.change > 0 ? '+' : ''}{asset.change.toFixed(2)}%</p>
-          </div>
-        </div>
-
-        {/* Gemini Insight Box */}
-        <div className="mx-auto max-w-[340px] bg-surface-dark border border-white/10 rounded-xl p-4 mb-6 text-left relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="flex items-center gap-2 mb-2 relative z-10">
-            <span className="material-symbols-outlined text-primary filled text-[18px]">bolt</span>
-            <span className="text-[10px] uppercase font-bold text-primary tracking-widest">Análisis Gemini AI</span>
-          </div>
-          {loadingInsight ? (
-            <div className="animate-pulse space-y-2 relative z-10">
-              <div className="h-3 bg-white/10 rounded w-full"></div>
-              <div className="h-3 bg-white/10 rounded w-3/4"></div>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-300 leading-relaxed italic relative z-10">
-              "{insight}"
-            </p>
-          )}
-        </div>
-
-        <div className="mx-auto max-w-[340px] bg-white/5 rounded-xl p-3 border border-white/10 flex items-center justify-between backdrop-blur-sm">
-          <div className="text-left">
-            <div className="flex items-center gap-1 mb-0.5">
-              <span className="material-symbols-outlined text-xs text-sky-400">inventory</span>
-              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Tu Tenencia</p>
-            </div>
-            <p className="text-lg font-bold text-white leading-tight">{asset.quantity} Acciones</p>
-            <p className="text-[10px] text-gray-400 font-medium">u$s {(asset.quantity * asset.price).toLocaleString('es-AR')}</p>
-          </div>
-          <div className="h-8 w-px bg-white/10 mx-2"></div>
-          <div className="text-right min-w-[100px]">
-            <div className="flex items-center justify-end gap-1 mb-0.5">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Market Status</p>
-              <span className="material-symbols-outlined text-[10px] text-primary">circle</span>
-            </div>
-            <p className="text-sm font-semibold text-primary">ABIERT0</p>
-            <p className="text-[9px] text-slate-500 mt-0.5">Precios real-time</p>
+            {Math.abs(asset.change).toFixed(2)}%
           </div>
         </div>
       </div>
 
-      {/* Detail Chart */}
-      <div className="w-full mt-6">
-        <div className="relative h-[200px] w-full px-0 group">
-          <svg className="overflow-visible" fill="none" height="100%" preserveAspectRatio="none" viewBox="0 0 478 150" width="100%">
-            <defs>
-              <linearGradient gradientUnits="userSpaceOnUse" id="detailGradient" x1="236" x2="236" y1="0" y2="150">
-                <stop stopColor="#13ec5b" stopOpacity="0.3"></stop>
-                <stop offset="1" stopColor="#13ec5b" stopOpacity="0"></stop>
-              </linearGradient>
-            </defs>
-            <path d="M0 109C18 109 18 21 36 21C54 21 54 41 72 41C90 41 90 93 108 93C127 93 127 33 145 33C163 33 163 101 181 101C199 101 199 61 217 61C236 61 236 45 254 45C272 45 272 121 290 121C308 121 308 149 326 149C344 149 344 1 363 1C381 1 381 81 399 81C417 81 417 129 435 129C453 129 453 25 472 25V150H0V109Z" fill="url(#detailGradient)"></path>
-            <path d="M0 109C18 109 18 21 36 21C54 21 54 41 72 41C90 41 90 93 108 93C127 93 127 33 145 33C163 33 163 101 181 101C199 101 199 61 217 61C236 61 236 45 254 45C272 45 272 121 290 121C308 121 308 149 326 149C344 149 344 1 363 1C381 1 381 81 399 81C417 81 417 129 435 129C453 129 453 25 472 25" stroke="#13ec5b" strokeLinecap="round" strokeWidth="2.5"></path>
-          </svg>
-        </div>
-        <div className="flex justify-between px-6 py-4">
-          {['1D', '1S', '1M', '3M', '1A', 'TOD'].map((p, i) => (
-            <button key={p} className={i === 2 ? 'bg-primary text-background-dark text-xs font-bold px-4 py-1.5 rounded-full' : 'text-slate-400 text-xs font-bold'}>{p}</button>
-          ))}
-        </div>
-      </div>
+      <main className="px-6 max-w-2xl mx-auto w-full">
+        {/* Gemini Insight Box - Rediseñada para ser el centro de atención */}
+        <section className="mt-6 mb-8 relative">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-accent-blue/50 rounded-2xl blur opacity-20"></div>
+          <div className="relative bg-surface-dark border border-white/10 rounded-2xl p-6 shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-background-dark shadow-[0_0_15px_rgba(19,236,91,0.4)]">
+                  <span className="material-symbols-outlined filled text-xl">bolt</span>
+                </div>
+                <div>
+                  <h4 className="text-white font-bold text-sm leading-none">Análisis con IA</h4>
+                  <p className="text-[10px] text-gray-500 font-bold uppercase mt-1">Sugerencia Estratégica</p>
+                </div>
+              </div>
+              {loadingInsight && <div className="size-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>}
+            </div>
+            
+            <div className="min-h-[60px] flex items-center">
+              {loadingInsight ? (
+                <div className="w-full space-y-2">
+                  <div className="h-3 bg-white/5 rounded-full w-full animate-pulse"></div>
+                  <div className="h-3 bg-white/5 rounded-full w-2/3 animate-pulse"></div>
+                </div>
+              ) : (
+                <p className="text-gray-200 text-base leading-relaxed italic font-medium">
+                  "{insight}"
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
 
-      <div className="px-5 py-6">
-        <h3 className="text-white text-lg font-bold mb-4">Métricas del Activo</h3>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-6">
-          <Stat label="Precio Actual" value={`u$s ${asset.price.toLocaleString('es-AR')}`} />
-          <Stat label="Máximo del Día" value={`u$s ${(asset.price * 1.02).toFixed(2)}`} />
-          <Stat label="Tu Inversión" value={`u$s ${(asset.quantity * asset.price).toLocaleString('es-AR')}`} />
-          <Stat label="Capitalización" value="784.3B" />
+        {/* Métricas rápidas */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="bg-surface-dark/40 p-4 rounded-2xl border border-white/5">
+            <p className="text-[10px] font-bold text-gray-500 uppercase mb-1">Tu Tenencia</p>
+            <p className="text-xl font-bold text-white">{asset.quantity}u</p>
+            <p className="text-xs text-primary font-bold">u$s {(asset.quantity * asset.price).toLocaleString('es-AR')}</p>
+          </div>
+          <div className="bg-surface-dark/40 p-4 rounded-2xl border border-white/5">
+            <p className="text-[10px] font-bold text-gray-500 uppercase mb-1">Estado</p>
+            <p className="text-xl font-bold text-primary">Abierto</p>
+            <p className="text-xs text-gray-500 font-bold">Tiempo Real</p>
+          </div>
         </div>
-      </div>
 
-      <div className="px-5 py-6">
         <h3 className="text-white text-lg font-bold mb-4">Últimas Noticias</h3>
         <div className="flex flex-col gap-4">
-          {NEWS_ITEMS.slice(0, 2).map(news => (
-            <div key={news.id} className="flex gap-4 items-start group">
-              <div className="flex-1 flex flex-col gap-1">
-                <span className="text-slate-500 text-[10px] font-bold uppercase">{news.source} • {news.time}</span>
-                <h4 className="text-white text-sm font-semibold leading-snug group-hover:text-primary transition-colors">
+          {NEWS_ITEMS.map(news => (
+            <div key={news.id} className="flex gap-4 p-4 bg-surface-dark/20 rounded-2xl border border-white/5 hover:bg-surface-dark/40 transition-colors cursor-pointer group">
+              <div className="flex-1">
+                <p className="text-[10px] font-bold text-sky-400 uppercase mb-1">{news.time} • {news.source}</p>
+                <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors leading-snug line-clamp-2">
                   {news.title}
                 </h4>
               </div>
+              <img src={news.imageUrl} className="size-16 rounded-xl object-cover opacity-60" alt="" />
             </div>
           ))}
         </div>
-      </div>
+      </main>
     </div>
   );
 };
-
-const Stat = ({ label, value }: { label: string, value: string }) => (
-  <div className="flex flex-col gap-1">
-    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">{label}</p>
-    <p className="text-white font-bold text-base">{value}</p>
-  </div>
-);
 
 export default AssetDetailScreen;
