@@ -16,6 +16,7 @@ export interface Asset {
 export interface NewsItem {
   id: string;
   source: string;
+  sourceLogo?: string;
   time: string;
   title: string;
   imageUrl: string;
