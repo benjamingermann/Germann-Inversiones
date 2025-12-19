@@ -5,39 +5,42 @@ import PortfolioSetupScreen from './components/PortfolioSetupScreen';
 import DashboardScreen from './components/DashboardScreen';
 import AssetDetailScreen from './components/AssetDetailScreen';
 import BottomNav from './components/BottomNav';
+import Sidebar from './components/Sidebar';
 import { Screen, Asset } from './types';
 import { INITIAL_ASSETS } from './constants';
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('WELCOME');
-  const [assets, setAssets] = useState<Asset[]>(INITIAL_ASSETS);
+  const [assets, setAssets] = useState<Asset[]>(() => {
+    const saved = localStorage.getItem('germann_assets');
+    return saved ? JSON.parse(saved) : INITIAL_ASSETS;
+  });
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
 
-  // Motor de Precios en Tiempo Real
+  // Guardar en localStorage siempre que cambien los activos
+  useEffect(() => {
+    localStorage.setItem('germann_assets', JSON.stringify(assets));
+  }, [assets]);
+
+  // Motor de Precios en Tiempo Real (Simulación)
   useEffect(() => {
     if (currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL') {
       const interval = setInterval(() => {
         setAssets(prevAssets => 
           prevAssets.map(asset => {
-            // Simular fluctuación de mercado entre -0.1% y +0.1%
-            const fluctuation = 1 + (Math.random() * 0.002 - 0.001);
-            const newPrice = asset.price * fluctuation;
-            const newChange = asset.change + (fluctuation - 1) * 100;
-            
+            const fluctuation = 1 + (Math.random() * 0.001 - 0.0005);
             return {
               ...asset,
-              price: Number(newPrice.toFixed(2)),
-              change: Number(newChange.toFixed(2))
+              price: Number((asset.price * fluctuation).toFixed(2)),
+              change: Number((asset.change + (fluctuation - 1) * 10).toFixed(2))
             };
           })
         );
-      }, 5000); // Actualiza cada 5 segundos
-
+      }, 5000);
       return () => clearInterval(interval);
     }
   }, [currentScreen]);
 
-  // Sincronizar el activo seleccionado si sus datos cambian en tiempo real
   useEffect(() => {
     if (selectedAsset) {
       const updated = assets.find(a => a.id === selectedAsset.id);
@@ -45,15 +48,11 @@ const App: React.FC = () => {
     }
   }, [assets]);
 
-  const handleStart = () => {
-    setCurrentScreen('SETUP');
-  };
-
+  const handleStart = () => setCurrentScreen('SETUP');
   const handleSavePortfolio = (newAssets: Asset[]) => {
     setAssets(newAssets);
     setCurrentScreen('DASHBOARD');
   };
-
   const handleAssetClick = (asset: Asset) => {
     setSelectedAsset(asset);
     setCurrentScreen('DETAIL');
@@ -72,27 +71,34 @@ const App: React.FC = () => {
           />
         );
       case 'DASHBOARD':
-        return (
-          <DashboardScreen 
-            assets={assets} 
-            onAssetClick={handleAssetClick}
-            onAddMoney={() => {}} // No longer used
-            onOperate={() => {}} // No longer used
-          />
-        );
+        return <DashboardScreen assets={assets} onAssetClick={handleAssetClick} onAddMoney={()=>{}} onOperate={()=>{}} />;
       case 'DETAIL':
-        return selectedAsset ? (
-          <AssetDetailScreen asset={selectedAsset} onBack={() => setCurrentScreen('DASHBOARD')} />
-        ) : null;
+        return selectedAsset ? <AssetDetailScreen asset={selectedAsset} onBack={() => setCurrentScreen('DASHBOARD')} /> : null;
       default:
         return <WelcomeScreen onStart={handleStart} onLogin={() => setCurrentScreen('DASHBOARD')} />;
     }
   };
 
   return (
-    <div className="max-w-md mx-auto bg-background-dark min-h-screen relative shadow-2xl overflow-x-hidden font-display">
-      {renderScreen()}
-      {(currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL') && <BottomNav />}
+    <div className="flex min-h-screen bg-background-dark text-white font-display overflow-x-hidden">
+      {/* Sidebar visible solo en desktop */}
+      {(currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL') && (
+        <div className="hidden lg:block">
+          <Sidebar />
+        </div>
+      )}
+
+      {/* Contenedor Principal */}
+      <div className={`flex-1 w-full mx-auto ${currentScreen === 'WELCOME' ? '' : 'max-w-7xl lg:px-8'}`}>
+        {renderScreen()}
+      </div>
+
+      {/* Nav inferior solo en móvil */}
+      {(currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL') && (
+        <div className="lg:hidden">
+          <BottomNav />
+        </div>
+      )}
     </div>
   );
 };
