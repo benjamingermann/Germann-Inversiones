@@ -17,26 +17,29 @@ const App: React.FC = () => {
   });
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
 
-  // Guardar en localStorage siempre que cambien los activos
   useEffect(() => {
     localStorage.setItem('germann_assets', JSON.stringify(assets));
   }, [assets]);
 
-  // Motor de Precios en Tiempo Real (Simulación)
+  // MOTOR DE PRECIOS "EN VIVO"
   useEffect(() => {
     if (currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL') {
       const interval = setInterval(() => {
         setAssets(prevAssets => 
           prevAssets.map(asset => {
-            const fluctuation = 1 + (Math.random() * 0.001 - 0.0005);
+            // Simulación sutil para mantener el balance actualizado (±0.15%)
+            const changeFactor = 1 + (Math.random() * 0.003 - 0.0015);
+            const newPrice = Number((asset.price * changeFactor).toFixed(2));
+            const newDayChange = Number((asset.change + (changeFactor - 1) * 10).toFixed(2));
+            
             return {
               ...asset,
-              price: Number((asset.price * fluctuation).toFixed(2)),
-              change: Number((asset.change + (fluctuation - 1) * 10).toFixed(2))
+              price: newPrice,
+              change: newDayChange
             };
           })
         );
-      }, 5000);
+      }, 2000); // Sincronización cada 2 segundos
       return () => clearInterval(interval);
     }
   }, [currentScreen]);
@@ -46,7 +49,7 @@ const App: React.FC = () => {
       const updated = assets.find(a => a.id === selectedAsset.id);
       if (updated) setSelectedAsset(updated);
     }
-  }, [assets]);
+  }, [assets, selectedAsset]);
 
   const handleStart = () => setCurrentScreen('SETUP');
   const handleSavePortfolio = (newAssets: Asset[]) => {
@@ -81,19 +84,16 @@ const App: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-background-dark text-white font-display overflow-x-hidden">
-      {/* Sidebar visible solo en desktop */}
       {(currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL') && (
         <div className="hidden lg:block">
           <Sidebar />
         </div>
       )}
 
-      {/* Contenedor Principal */}
-      <div className={`flex-1 w-full mx-auto ${currentScreen === 'WELCOME' ? '' : 'max-w-7xl lg:px-8'}`}>
+      <div className={`flex-1 w-full mx-auto transition-all duration-500 ${currentScreen === 'WELCOME' ? '' : 'max-w-7xl lg:px-12'}`}>
         {renderScreen()}
       </div>
 
-      {/* Nav inferior solo en móvil */}
       {(currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL') && (
         <div className="lg:hidden">
           <BottomNav />

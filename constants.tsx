@@ -10,7 +10,7 @@ export const INITIAL_ASSETS: Asset[] = [
     quantity: 15.0,
     price: 189.45,
     change: 1.24,
-    logo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDJ4Iv-PJTDUU9naOThNcRim0jULfeR8OIB9XmEAQkJFFqayUpNNOFqDS6Udd1Kun1xpyID1qV-ffz873Rnt0MnxuXmUJI-pSv7lJOWifzxoAEpxYQ0F8ce0ztm4rDbJmkML6HP9leBI-uyEMtpocHt_bmAfO5dP1jWObScAGe2i49Uu9q_TF2zRSja_NvkfWllnsQ93asXw_PfuTY7CIRy508WRWt-WjkB5NSUhUaqN3iCQAd9mh2cDlZcF8tK5HktnxaqOOCCxPA',
+    logo: 'https://logo.clearbit.com/apple.com',
     type: 'Stock'
   },
   {
@@ -21,6 +21,7 @@ export const INITIAL_ASSETS: Asset[] = [
     quantity: 450.0,
     price: 24540.50,
     change: 4.15,
+    logo: 'https://logo.clearbit.com/ypf.com',
     type: 'Merval'
   },
   {
@@ -31,6 +32,7 @@ export const INITIAL_ASSETS: Asset[] = [
     quantity: 50,
     price: 12350.00,
     change: -0.32,
+    logo: 'https://logo.clearbit.com/coca-cola.com',
     type: 'CEDEAR'
   },
   {
@@ -41,7 +43,7 @@ export const INITIAL_ASSETS: Asset[] = [
     quantity: 10.0,
     price: 460.15,
     change: 3.12,
-    logo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDN0LIibMe6jL5Jf_ec_SJRDa3CMxr53WUPusCbKdwHyyzQK1a8gQt6MhZLAu0V0O-9FBiugyoGqE7kfaRui7zIF4VO5cl06DHdCG6pBx3vCSTo2WLnWdElVuJOt2I4ZGheEViTpGg8VJbGhTvjtMs39zwcFyBJYek1lQsiMgLq8tEkast3oBfXFiTu5kKKR01uQ1emln3HJv-0oqU-GkXB-Tft4Vk4rMnSPoREqC6fG70Yh_R3mwO9DLQdyB5Qgi83dBcuwqbyBMA',
+    logo: 'https://logo.clearbit.com/nvidia.com',
     type: 'Stock'
   },
   {
@@ -52,14 +54,26 @@ export const INITIAL_ASSETS: Asset[] = [
     quantity: 1200,
     price: 3120.50,
     change: 1.80,
+    logo: 'https://logo.clearbit.com/grupogalicia.com.ar',
     type: 'Merval'
+  },
+  {
+    id: '6',
+    symbol: 'MELI',
+    name: 'Mercado Libre',
+    market: 'US',
+    quantity: 5,
+    price: 1745.20,
+    change: 2.45,
+    logo: 'https://logo.clearbit.com/mercadolibre.com',
+    type: 'CEDEAR'
   }
 ];
 
 export const MARKET_RATES: MarketRate[] = [
-  { name: 'Dólar Blue', buy: 985, sell: 1005, icon: 'currency_exchange', color: 'text-blue-400' },
-  { name: 'Dólar MEP', buy: 1042, sell: 1042, change: 1.2, icon: 'trending_up', color: 'text-primary' },
-  { name: 'Dólar CCL', buy: 1089, sell: 1089, change: -0.5, icon: 'account_balance', color: 'text-purple-400' }
+  { name: 'Dólar Blue', buy: 1245, sell: 1265, icon: 'currency_exchange', color: 'text-blue-400' },
+  { name: 'Dólar MEP', buy: 1210, sell: 1215, change: 0.8, icon: 'trending_up', color: 'text-primary' },
+  { name: 'Dólar CCL', buy: 1235, sell: 1240, change: -0.2, icon: 'account_balance', color: 'text-purple-400' }
 ];
 
 export const NEWS_ITEMS: NewsItem[] = [
@@ -72,16 +86,16 @@ export const NEWS_ITEMS: NewsItem[] = [
   },
   {
     id: 'n2',
-    source: 'Investing.com',
+    source: 'Bloomberg',
     time: 'Hace 15m',
-    title: 'Merval hoy: Las acciones argentinas suben con fuerza tras nuevos anuncios económicos',
+    title: 'Acciones argentinas extienden rally tras confirmación de superávit fiscal',
     imageUrl: 'https://images.investing.com/news/world_news_2_1603991269_L.jpg'
   },
   {
     id: 'n3',
-    source: 'Investing.com',
+    source: 'Reuters',
     time: 'Hace 1h',
-    title: 'Bitcoin supera los 90.000 USD impulsado por la demanda institucional',
+    title: 'Bitcoin rompe récords: analistas prevén un nuevo techo para fin de año',
     imageUrl: 'https://images.investing.com/news/moved_f8540d58525b3997d81977755b76c8c4_L.jpg'
   }
 ];
