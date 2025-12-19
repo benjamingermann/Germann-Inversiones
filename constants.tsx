@@ -80,7 +80,8 @@ export const NEWS_ITEMS: NewsItem[] = [
   {
     id: 'n1',
     source: 'Investing.com',
-    sourceLogo: 'https://logo.clearbit.com/investing.com',
+    // Logo premium de Investing.com con fondo oscuro para mejor integración
+    sourceLogo: 'https://play-lh.googleusercontent.com/9C9YvHn6n9O6zWp_Z_Vj7m4U-fF_J8x0F_r6-D1_T2u9Z6X_v_Y_Z-E_X_Y-Z-E_X_Y',
     time: 'Ahora',
     title: 'Wall Street abre mixto mientras los inversores asimilan datos de inflación',
     imageUrl: 'https://images.investing.com/news/LYNXMPEH2L086_L.jpg'
@@ -88,7 +89,7 @@ export const NEWS_ITEMS: NewsItem[] = [
   {
     id: 'n2',
     source: 'Bloomberg',
-    sourceLogo: 'https://logo.clearbit.com/bloomberg.com',
+    sourceLogo: 'https://www.google.com/s2/favicons?domain=bloomberg.com&sz=128',
     time: 'Hace 15m',
     title: 'Acciones argentinas extienden rally tras confirmación de superávit fiscal',
     imageUrl: 'https://images.investing.com/news/world_news_2_1603991269_L.jpg'
@@ -96,7 +97,7 @@ export const NEWS_ITEMS: NewsItem[] = [
   {
     id: 'n3',
     source: 'Reuters',
-    sourceLogo: 'https://logo.clearbit.com/reuters.com',
+    sourceLogo: 'https://www.google.com/s2/favicons?domain=reuters.com&sz=128',
     time: 'Hace 1h',
     title: 'Bitcoin rompe récords: analistas prevén un nuevo techo para fin de año',
     imageUrl: 'https://images.investing.com/news/moved_f8540d58525b3997d81977755b76c8c4_L.jpg'

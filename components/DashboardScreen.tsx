@@ -30,7 +30,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
   }, 0);
   
   return (
-    <div className="flex flex-col min-h-screen bg-background-dark pb-32 lg:pb-12 pt-4 lg:pt-8 animate-fade-in font-display">
+    <div className="flex flex-col min-h-screen bg-background-dark pb-32 lg:pb-12 pt-4 lg:pt-8 animate-fade-in font-display overflow-y-auto">
       <header className="px-6 lg:px-0 mb-8 flex justify-between items-center">
         <div>
           <h2 className="text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-1">Mi Portafolio</h2>
@@ -56,7 +56,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
         <div className="lg:col-span-8 flex flex-col gap-10">
           {/* Top Cards Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <section className="bg-gradient-to-br from-surface-dark to-background-dark p-8 rounded-[2.5rem] border border-white/10 flex flex-col justify-center relative overflow-hidden group shadow-2xl">
+            <section className="bg-gradient-to-br from-surface-dark to-background-dark p-8 rounded-[2.5rem] border border-white/10 flex flex-col justify-center relative overflow-hidden group shadow-2xl min-h-[180px]">
               <div className="absolute -right-4 -top-4 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors"></div>
               <span className="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-[0.2em]">Patrimonio Total</span>
               <div className="flex items-baseline gap-2 mb-4">
@@ -71,16 +71,16 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
               </div>
             </section>
 
-            {/* Ahora Play Card - LOGO CORREGIDO */}
+            {/* Ahora Play Card - LOGO ACTUALIZADO */}
             <section 
               onClick={() => window.open('https://www.youtube.com/@Ahora_Play', '_blank')}
-              className="relative overflow-hidden p-8 rounded-[2.5rem] flex flex-col justify-between cursor-pointer group shadow-xl bg-[#00102b] border border-white/5"
+              className="relative overflow-hidden p-8 rounded-[2.5rem] flex flex-col justify-between cursor-pointer group shadow-xl bg-[#00143a] border border-white/5 min-h-[180px]"
             >
               <div className="relative flex justify-between items-start">
-                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-white/10 p-2 overflow-hidden transform group-hover:scale-105 transition-transform duration-500">
+                <div className="w-24 h-12 flex items-center justify-start overflow-hidden transform group-hover:scale-105 transition-transform duration-500">
                   <img 
                     src="https://pbs.twimg.com/profile_images/1643265416040857602/f_R1l4t3_400x400.jpg" 
-                    className="w-full h-full object-contain" 
+                    className="w-full h-full object-contain object-left" 
                     alt="Ahora Play" 
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = 'https://yt3.googleusercontent.com/ytc/AIdro_n_1768E5q9q9n9q9n9q9n9q9n9q9n9q9n9q=s176-c-k-c0x00ffffff-no-rj';
@@ -94,7 +94,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
               </div>
               <div className="relative mt-8">
                 <h3 className="text-white text-2xl font-black mb-1.5 tracking-tight">Ahora Play</h3>
-                <p className="text-gray-400 text-sm font-medium tracking-tight">Análisis y noticias del mercado</p>
+                <p className="text-gray-300/60 text-sm font-medium tracking-tight">Análisis y noticias del mercado</p>
               </div>
             </section>
           </div>
@@ -111,7 +111,14 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
                     <div className="flex items-center gap-3 mb-3">
                       <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-lg border border-white/10">
                         {news.sourceLogo && (
-                          <img src={news.sourceLogo} className="w-4 h-4 object-contain rounded-sm" alt="" />
+                          <img 
+                            src={news.sourceLogo} 
+                            className="w-5 h-5 object-contain rounded-sm" 
+                            alt={news.source} 
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = 'https://www.google.com/s2/favicons?domain=investing.com&sz=64';
+                            }}
+                          />
                         )}
                         <span className="text-[10px] font-black text-white uppercase tracking-wider">{news.source}</span>
                       </div>
