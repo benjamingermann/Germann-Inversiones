@@ -71,9 +71,10 @@ export const INITIAL_ASSETS: Asset[] = [
 ];
 
 export const MARKET_RATES: MarketRate[] = [
-  { name: 'Dólar Blue', buy: 1245, sell: 1265, icon: 'currency_exchange', color: 'text-blue-400' },
-  { name: 'Dólar MEP', buy: 1210, sell: 1215, change: 0.8, icon: 'trending_up', color: 'text-primary' },
-  { name: 'Dólar CCL', buy: 1235, sell: 1240, change: -0.2, icon: 'account_balance', color: 'text-purple-400' }
+  // Fixed property names to match MarketRate interface: name -> nombre, buy -> compra, sell -> venta
+  { nombre: 'Dólar Blue', compra: 1245, venta: 1265, fechaActualizacion: new Date().toISOString(), icon: 'currency_exchange', color: 'text-blue-400' },
+  { nombre: 'Dólar MEP', compra: 1210, venta: 1215, fechaActualizacion: new Date().toISOString(), change: 0.8, icon: 'trending_up', color: 'text-primary' },
+  { nombre: 'Dólar CCL', compra: 1235, venta: 1240, fechaActualizacion: new Date().toISOString(), change: -0.2, icon: 'account_balance', color: 'text-purple-400' }
 ];
 
 export const NEWS_ITEMS: NewsItem[] = [

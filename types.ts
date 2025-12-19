@@ -1,5 +1,5 @@
 
-export type Screen = 'WELCOME' | 'SETUP' | 'DASHBOARD' | 'DETAIL';
+export type Screen = 'WELCOME' | 'SETUP' | 'DASHBOARD' | 'DETAIL' | 'MARKETS';
 
 export interface Asset {
   id: string;
@@ -22,10 +22,19 @@ export interface NewsItem {
 }
 
 export interface MarketRate {
-  name: string;
-  buy: number;
-  sell: number;
+  nombre: string;
+  compra: number;
+  venta: number;
+  fechaActualizacion: string;
+  // Optional properties for local usage and UI enhancements
+  icon?: string;
+  color?: string;
   change?: number;
-  icon: string;
-  color: string;
+}
+
+export interface DollarRates {
+  blue?: MarketRate;
+  mep?: MarketRate;
+  ccl?: MarketRate;
+  oficial?: MarketRate;
 }

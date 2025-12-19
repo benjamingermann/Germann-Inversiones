@@ -4,9 +4,10 @@ import WelcomeScreen from './components/WelcomeScreen';
 import PortfolioSetupScreen from './components/PortfolioSetupScreen';
 import DashboardScreen from './components/DashboardScreen';
 import AssetDetailScreen from './components/AssetDetailScreen';
+import MarketsScreen from './components/MarketsScreen';
 import BottomNav from './components/BottomNav';
 import Sidebar from './components/Sidebar';
-import { Screen, Asset } from './types';
+import { Screen, Asset, DollarRates } from './types';
 import { INITIAL_ASSETS } from './constants';
 
 const App: React.FC = () => {
@@ -16,6 +17,29 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : INITIAL_ASSETS;
   });
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [dollarRates, setDollarRates] = useState<DollarRates>({});
+
+  // Fetch de Dólares Reales
+  useEffect(() => {
+    const fetchDollars = async () => {
+      try {
+        const response = await fetch('https://dolarapi.com/v1/dolares');
+        const data = await response.json();
+        const rates: DollarRates = {
+          oficial: data.find((d: any) => d.casa === 'oficial'),
+          blue: data.find((d: any) => d.casa === 'blue'),
+          mep: data.find((d: any) => d.casa === 'mep'),
+          ccl: data.find((d: any) => d.casa === 'contadoconliqui'),
+        };
+        setDollarRates(rates);
+      } catch (error) {
+        console.error("Error fetching dollars:", error);
+      }
+    };
+    fetchDollars();
+    const interval = setInterval(fetchDollars, 60000); // Actualizar cada minuto
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('germann_assets', JSON.stringify(assets));
@@ -23,23 +47,19 @@ const App: React.FC = () => {
 
   // MOTOR DE PRECIOS "EN VIVO"
   useEffect(() => {
-    if (currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL') {
+    if (currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL' || currentScreen === 'MARKETS') {
       const interval = setInterval(() => {
         setAssets(prevAssets => 
           prevAssets.map(asset => {
-            // Simulación sutil para mantener el balance actualizado (±0.15%)
-            const changeFactor = 1 + (Math.random() * 0.003 - 0.0015);
-            const newPrice = Number((asset.price * changeFactor).toFixed(2));
-            const newDayChange = Number((asset.change + (changeFactor - 1) * 10).toFixed(2));
-            
+            const changeFactor = 1 + (Math.random() * 0.002 - 0.001);
             return {
               ...asset,
-              price: newPrice,
-              change: newDayChange
+              price: Number((asset.price * changeFactor).toFixed(2)),
+              change: Number((asset.change + (changeFactor - 1) * 5).toFixed(2))
             };
           })
         );
-      }, 2000); // Sincronización cada 2 segundos
+      }, 3000);
       return () => clearInterval(interval);
     }
   }, [currentScreen]);
@@ -66,15 +86,11 @@ const App: React.FC = () => {
       case 'WELCOME':
         return <WelcomeScreen onStart={handleStart} onLogin={() => setCurrentScreen('DASHBOARD')} />;
       case 'SETUP':
-        return (
-          <PortfolioSetupScreen 
-            onBack={() => setCurrentScreen('WELCOME')} 
-            onSave={handleSavePortfolio}
-            initialAssets={assets}
-          />
-        );
+        return <PortfolioSetupScreen onBack={() => setCurrentScreen('WELCOME')} onSave={handleSavePortfolio} initialAssets={assets} />;
       case 'DASHBOARD':
-        return <DashboardScreen assets={assets} onAssetClick={handleAssetClick} onAddMoney={()=>{}} onOperate={()=>{}} />;
+        return <DashboardScreen assets={assets} dollarRates={dollarRates} onAssetClick={handleAssetClick} onAddMoney={()=>{}} onOperate={()=>{}} />;
+      case 'MARKETS':
+        return <MarketsScreen assets={assets} onAssetClick={handleAssetClick} />;
       case 'DETAIL':
         return selectedAsset ? <AssetDetailScreen asset={selectedAsset} onBack={() => setCurrentScreen('DASHBOARD')} /> : null;
       default:
@@ -84,19 +100,19 @@ const App: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-background-dark text-white font-display overflow-x-hidden">
-      {(currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL') && (
+      {(currentScreen !== 'WELCOME' && currentScreen !== 'SETUP') && (
         <div className="hidden lg:block">
-          <Sidebar />
+          <Sidebar currentScreen={currentScreen} onNavigate={setCurrentScreen} />
         </div>
       )}
 
-      <div className={`flex-1 w-full mx-auto transition-all duration-500 ${currentScreen === 'WELCOME' ? '' : 'max-w-7xl lg:px-12'}`}>
+      <div className={`flex-1 w-full mx-auto transition-all duration-500 ${(currentScreen === 'WELCOME' || currentScreen === 'SETUP') ? '' : 'max-w-7xl lg:px-12'}`}>
         {renderScreen()}
       </div>
 
-      {(currentScreen === 'DASHBOARD' || currentScreen === 'DETAIL') && (
+      {(currentScreen !== 'WELCOME' && currentScreen !== 'SETUP') && (
         <div className="lg:hidden">
-          <BottomNav />
+          <BottomNav currentScreen={currentScreen} onNavigate={setCurrentScreen} />
         </div>
       )}
     </div>
