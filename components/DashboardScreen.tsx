@@ -71,19 +71,19 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ assets, dollarRates, 
               </div>
             </section>
 
-            {/* Ahora Play Card - ESTILO EXACTO CAPTURA */}
+            {/* Ahora Play Card - LOGO CORREGIDO */}
             <section 
               onClick={() => window.open('https://www.youtube.com/@Ahora_Play', '_blank')}
               className="relative overflow-hidden p-8 rounded-[2.5rem] flex flex-col justify-between cursor-pointer group shadow-xl bg-[#00102b] border border-white/5"
             >
               <div className="relative flex justify-between items-start">
-                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-white/10 p-1 overflow-hidden transform group-hover:scale-105 transition-transform">
+                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-white/10 p-2 overflow-hidden transform group-hover:scale-105 transition-transform duration-500">
                   <img 
-                    src="https://yt3.ggpht.com/ytc/AIdro_n_1768E5q9q9n9q9n9q9n9q9n9q9n9q9n9q=s800-c-k-c0x00ffffff-no-rj" 
+                    src="https://pbs.twimg.com/profile_images/1643265416040857602/f_R1l4t3_400x400.jpg" 
                     className="w-full h-full object-contain" 
                     alt="Ahora Play" 
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://pbs.twimg.com/profile_images/1643265416040857602/f_R1l4t3_400x400.jpg';
+                      (e.target as HTMLImageElement).src = 'https://yt3.googleusercontent.com/ytc/AIdro_n_1768E5q9q9n9q9n9q9n9q9n9q9n9q9n9q=s176-c-k-c0x00ffffff-no-rj';
                     }}
                   />
                 </div>

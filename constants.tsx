@@ -80,7 +80,7 @@ export const NEWS_ITEMS: NewsItem[] = [
   {
     id: 'n1',
     source: 'Investing.com',
-    sourceLogo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6_q2e4S7mGq_P5C-S0707S-o5o3_5C-S070&s', // Logo Investing.com
+    sourceLogo: 'https://logo.clearbit.com/investing.com',
     time: 'Ahora',
     title: 'Wall Street abre mixto mientras los inversores asimilan datos de inflación',
     imageUrl: 'https://images.investing.com/news/LYNXMPEH2L086_L.jpg'

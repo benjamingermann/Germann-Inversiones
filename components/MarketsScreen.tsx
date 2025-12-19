@@ -62,12 +62,6 @@ const MarketsScreen: React.FC<MarketsScreenProps> = ({ assets, onAssetClick }) =
               ))}
             </div>
           </section>
-
-          <section className="bg-primary/5 p-8 rounded-[2.5rem] border border-primary/10 text-center">
-            <h3 className="text-xl font-black text-primary mb-2">¿Querés más datos?</h3>
-            <p className="text-gray-400 text-sm max-w-md mx-auto mb-6">Conectá tu cuenta de InvertirOnline o Bull Market para sincronizar tu cartera real automáticamente.</p>
-            <button className="bg-primary text-background-dark px-8 py-3 rounded-xl font-bold hover:scale-105 transition-transform">Sincronizar Broker</button>
-          </section>
         </div>
       </main>
     </div>
