@@ -13,23 +13,21 @@ export const fetchRealPrices = async (symbols: string[]): Promise<PriceUpdate[]>
 
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    // Usamos gemini-3-flash-preview que es significativamente más rápido que el modelo Pro
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
-      contents: `Consulta de precios bursátiles en tiempo real.
-      Símbolos: ${symbols.join(", ")}.
+      model: "gemini-3-flash-preview",
+      contents: `Price check for: ${symbols.join(", ")}.
+      Rules:
+      1. ADRs (YPF, GGAL, BMA, PAM): Market 'US' -> Price in USD (eg. 30.50).
+      2. Argentina (YPFD, GGAL): Market 'ARG' -> Price in ARS (eg. 35000).
+      3. US Stocks (NVDA, AAPL): USD.
       
-      INSTRUCCIONES CRÍTICAS:
-      1. ADRs (YPF, GGAL, BMA): Si son de Wall Street (NYSE), dame el precio en DÓLARES (u$s). 
-         YPF suele estar entre 25 y 40 u$s. GGAL entre 40 y 65 u$s.
-      2. Acciones locales (YPFD, GGAL): Si son de Argentina, dame el precio en PESOS (ARS). 
-         YPFD suele estar en ~30.000+ pesos.
-      3. NVDA, AAPL, MSFT: Precio en u$s (Wall Street).
-      
-      Responde EXCLUSIVAMENTE con este formato JSON:
-      { "prices": [{ "symbol": "YPF", "price": 31.45 }] }`,
+      Return ONLY JSON: { "prices": [{ "symbol": "YPF", "price": 31.2 }] }`,
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
+        // Deshabilitamos el pensamiento profundo para ganar velocidad pura
+        thinkingConfig: { thinkingBudget: 0 },
         responseSchema: {
           type: Type.OBJECT,
           properties: {
@@ -53,7 +51,7 @@ export const fetchRealPrices = async (symbols: string[]): Promise<PriceUpdate[]>
     const data = JSON.parse(response.text);
     return data.prices || [];
   } catch (error) {
-    console.error("Error al sincronizar precios con Gemini:", error);
+    console.error("Error al sincronizar precios con Gemini Flash:", error);
     return [];
   }
 };
