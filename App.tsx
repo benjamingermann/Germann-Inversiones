@@ -27,7 +27,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Sincronización de Dólares (API Gratuita estable)
+  // Sincronización de Dólares
   const fetchDollars = async () => {
     try {
       const response = await fetch('https://dolarapi.com/v1/dolares');
@@ -46,32 +46,33 @@ const App: React.FC = () => {
 
   useEffect(() => {
     fetchDollars();
-    const interval = setInterval(fetchDollars, 300000); // Cada 5 minutos
+    const interval = setInterval(fetchDollars, 300000); 
     return () => clearInterval(interval);
   }, []);
 
-  // Sincronización de precios con IA
+  // Sincronización de precios con Alpha Vantage
   const syncRealPrices = useCallback(async () => {
     if (assets.length === 0 || isSyncing) return;
     setIsSyncing(true);
-    const symbols = assets.map(a => a.symbol);
+    
     try {
-      const updates = await fetchRealPrices(symbols);
+      // Ahora enviamos el objeto Asset completo para que el servicio sepa el mercado (US/ARG)
+      const updates = await fetchRealPrices(assets);
+      
       if (updates && updates.length > 0) {
         setAssets(prev => prev.map(asset => {
           const update = updates.find(u => u.symbol.toUpperCase() === asset.symbol.toUpperCase());
-          // Solo actualizamos si el precio es mayor a 0 para no sobreescribir con errores
           return (update && update.price > 0) ? { ...asset, price: update.price } : asset;
         }));
       }
     } catch (e) {
-      console.error("Sync failed", e);
+      console.error("Error en la sincronización de precios:", e);
     } finally {
       setIsSyncing(false);
     }
-  }, [assets.length, isSyncing]);
+  }, [assets, isSyncing]);
 
-  // AUTO-SYNC: Si hay activos con precio 0, intentar sincronizar inmediatamente
+  // AUTO-SYNC: Activos nuevos sin precio
   useEffect(() => {
     const hasUnpricedAssets = assets.some(a => a.price === 0);
     if (hasUnpricedAssets && !isSyncing && assets.length > 0) {
@@ -79,7 +80,7 @@ const App: React.FC = () => {
     }
   }, [assets, isSyncing, syncRealPrices]);
 
-  // Persistencia local permanente
+  // Persistencia local
   useEffect(() => {
     localStorage.setItem('germann_assets_v2', JSON.stringify(assets));
   }, [assets]);

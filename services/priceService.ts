@@ -1,57 +1,80 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { Asset } from "../types";
 
 export interface PriceUpdate {
   symbol: string;
   price: number;
 }
 
-export const fetchRealPrices = async (symbols: string[]): Promise<PriceUpdate[]> => {
-  if (!process.env.API_KEY || symbols.length === 0) {
+// Configuración de Caché
+interface CacheEntry {
+  price: number;
+  timestamp: number;
+}
+
+const priceCache = new Map<string, CacheEntry>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos de validez
+
+/**
+ * Obtiene los precios reales usando la API de Alpha Vantage.
+ * Implementa caché y manejo de mercados para optimizar el rendimiento.
+ */
+export const fetchRealPrices = async (assets: Asset[]): Promise<PriceUpdate[]> => {
+  const apiKey = process.env.ALPHA_VANTAGE_KEY || process.env.API_KEY; // Fallback al API_KEY si no está la específica
+  
+  if (!apiKey || assets.length === 0) {
+    console.warn("Falta API Key o lista de activos para sincronizar.");
     return [];
   }
 
-  try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    // Usamos gemini-3-flash-preview que es significativamente más rápido que el modelo Pro
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Price check for: ${symbols.join(", ")}.
-      Rules:
-      1. ADRs (YPF, GGAL, BMA, PAM): Market 'US' -> Price in USD (eg. 30.50).
-      2. Argentina (YPFD, GGAL): Market 'ARG' -> Price in ARS (eg. 35000).
-      3. US Stocks (NVDA, AAPL): USD.
+  const results: PriceUpdate[] = [];
+  const now = Date.now();
+
+  for (const asset of assets) {
+    const cacheKey = `${asset.market}:${asset.symbol}`;
+    const cached = priceCache.get(cacheKey);
+
+    // Si el dato está en caché y es reciente, lo usamos
+    if (cached && (now - cached.timestamp < CACHE_TTL)) {
+      results.push({ symbol: asset.symbol, price: cached.price });
+      continue;
+    }
+
+    // Preparar el símbolo para Alpha Vantage
+    // Mercado ARG suele requerir .BA (Buenos Aires)
+    const avSymbol = asset.market === 'ARG' ? `${asset.symbol}.BA` : asset.symbol;
+
+    try {
+      // Nota: En el plan gratuito de Alpha Vantage hay un límite de llamadas por minuto.
+      // Para un portafolio pequeño, esto funciona bien. Para más de 5 activos nuevos,
+      // se recomienda un delay o cuenta premium.
+      const response = await fetch(
+        `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${avSymbol}&apikey=${apiKey}`
+      );
       
-      Return ONLY JSON: { "prices": [{ "symbol": "YPF", "price": 31.2 }] }`,
-      config: {
-        tools: [{ googleSearch: {} }],
-        responseMimeType: "application/json",
-        // Deshabilitamos el pensamiento profundo para ganar velocidad pura
-        thinkingConfig: { thinkingBudget: 0 },
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            prices: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  symbol: { type: Type.STRING },
-                  price: { type: Type.NUMBER }
-                },
-                required: ["symbol", "price"]
-              }
-            }
-          },
-          required: ["prices"]
-        }
-      },
-    });
+      const data = await response.json();
+      const quote = data["Global Quote"];
 
-    const data = JSON.parse(response.text);
-    return data.prices || [];
-  } catch (error) {
-    console.error("Error al sincronizar precios con Gemini Flash:", error);
-    return [];
+      if (quote && quote["05. price"]) {
+        const price = parseFloat(quote["05. price"]);
+        
+        // Actualizar caché
+        priceCache.set(cacheKey, { price, timestamp: now });
+        results.push({ symbol: asset.symbol, price });
+      } else {
+        console.warn(`No se encontró cotización para ${avSymbol} en Alpha Vantage.`);
+        // Si falla Alpha Vantage, mantenemos el precio actual si existe
+        if (asset.price > 0) results.push({ symbol: asset.symbol, price: asset.price });
+      }
+
+      // Pequeño delay para respetar rate limits de APIs gratuitas (solo si hay más de 1 petición)
+      if (assets.length > 1) {
+        await new Promise(resolve => setTimeout(resolve, 500)); 
+      }
+    } catch (error) {
+      console.error(`Error consultando precio para ${asset.symbol}:`, error);
+    }
   }
+
+  return results;
 };
