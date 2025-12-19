@@ -19,10 +19,10 @@ const PortfolioSetupScreen: React.FC<PortfolioSetupScreenProps> = ({ onBack, onS
     const newAsset: Asset = {
       id: Math.random().toString(36).substr(2, 9),
       symbol: symbol.toUpperCase(),
-      name: symbol.toUpperCase(), // Mocked name
+      name: symbol.toUpperCase(),
       market,
       quantity: parseFloat(quantity),
-      price: market === 'US' ? 150 : 2500, // Mocked price
+      price: market === 'US' ? 150 : 2500,
       change: Math.random() * 5 - 2,
       type: market === 'US' ? 'Stock' : 'Merval'
     };
@@ -36,72 +36,72 @@ const PortfolioSetupScreen: React.FC<PortfolioSetupScreenProps> = ({ onBack, onS
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background-dark text-white overflow-hidden">
-      <header className="sticky top-0 z-50 flex items-center bg-background-dark p-4 pb-2 justify-between border-b border-white/5 backdrop-blur-md">
+    <div className="flex flex-col min-h-screen bg-background-dark text-white pb-20">
+      <header className="sticky top-0 z-50 flex items-center bg-background-dark/95 backdrop-blur-xl p-6 border-b border-white/5">
         <button 
           onClick={onBack}
-          className="text-white flex size-12 shrink-0 items-center justify-start cursor-pointer transition-opacity hover:opacity-70"
+          className="text-white flex size-12 items-center justify-center rounded-full hover:bg-white/5 transition-colors"
         >
           <span className="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
         </button>
-        <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-2">Configuración de Cartera</h2>
-        <div className="flex items-center justify-end">
+        <h2 className="text-white text-xl font-black tracking-tight flex-1 text-center pr-12">Configuración</h2>
+        <div className="flex items-center">
           <button 
             onClick={() => onSave(addedAssets)}
-            className="text-primary text-base font-bold leading-normal tracking-[0.015em] shrink-0 hover:text-primary/80 transition-colors"
+            className="bg-primary text-background-dark px-6 py-2 rounded-full text-sm font-black uppercase tracking-widest hover:scale-105 transition-transform"
           >
-            Guardar
+            Listo
           </button>
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto pb-24 scrollbar-hide">
-        <div className="px-4 py-6">
-          <h1 className="text-2xl font-bold text-white mb-2">Construye tu Cartera</h1>
-          <p className="text-[#92c9a4] text-sm font-normal leading-normal">
-            Selecciona el mercado y añade los tickers de tus acciones de EE. UU. o Argentina (Merval/CEDEARs) junto con la cantidad.
+      <div className="max-w-2xl mx-auto w-full px-6 pt-10">
+        <div className="mb-12">
+          <h1 className="text-4xl font-black text-white mb-4 tracking-tighter">Tu Cartera</h1>
+          <p className="text-gray-400 text-base font-medium leading-relaxed">
+            Añade los símbolos de tus activos (AAPL, GGAL, BTC) para sincronizar precios en tiempo real.
           </p>
         </div>
 
-        <div className="px-4 pb-2">
-          <div className="flex flex-col gap-4">
+        <div className="bg-surface-dark/40 p-8 rounded-[2.5rem] border border-white/5 shadow-2xl mb-12">
+          <div className="flex flex-col gap-6">
             <div className="flex flex-col w-full">
-              <label className="text-white text-sm font-medium leading-normal pb-2 ml-1">Mercado</label>
-              <div className="flex w-full rounded-xl bg-[#152b1e] p-1 border border-[#326744]">
+              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-3 ml-2">Mercado</label>
+              <div className="flex w-full rounded-2xl bg-background-dark p-1.5 border border-white/5">
                 <button 
                   onClick={() => setMarket('US')}
-                  className={`flex-1 rounded-lg py-2.5 text-sm font-bold transition-all ${market === 'US' ? 'bg-[#23482f] text-white' : 'text-[#92c9a4]'}`}
+                  className={`flex-1 rounded-xl py-3 text-xs font-black uppercase tracking-widest transition-all ${market === 'US' ? 'bg-primary text-background-dark shadow-lg' : 'text-gray-500 hover:text-white'}`}
                 >
-                  EE. UU.
+                  Wall Street
                 </button>
                 <button 
                   onClick={() => setMarket('ARG')}
-                  className={`flex-1 rounded-lg py-2.5 text-sm font-bold transition-all ${market === 'ARG' ? 'bg-[#23482f] text-white' : 'text-[#92c9a4]'}`}
+                  className={`flex-1 rounded-xl py-3 text-xs font-black uppercase tracking-widest transition-all ${market === 'ARG' ? 'bg-primary text-background-dark shadow-lg' : 'text-gray-500 hover:text-white'}`}
                 >
                   Argentina
                 </button>
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <div className="flex flex-col flex-1 min-w-0">
-                <label className="text-white text-sm font-medium leading-normal pb-2 ml-1">Símbolo</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-3 ml-2">Símbolo</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#92c9a4]">search</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-500">search</span>
                   <input 
-                    className="form-input flex w-full rounded-xl text-white focus:ring-primary/50 border-[#326744] bg-[#193322] h-14 pl-12 pr-4 text-base font-normal uppercase transition-all" 
-                    placeholder="AAPL" 
+                    className="flex w-full rounded-2xl text-white focus:ring-2 focus:ring-primary/40 border-white/5 bg-background-dark h-14 pl-12 pr-4 text-base font-bold uppercase transition-all outline-none" 
+                    placeholder="AAPL / GGAL" 
                     type="text" 
                     value={symbol}
                     onChange={(e) => setSymbol(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="flex flex-col w-32 shrink-0">
-                <label className="text-white text-sm font-medium leading-normal pb-2 ml-1">Cantidad</label>
+              <div className="flex flex-col">
+                <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-3 ml-2">Cantidad</label>
                 <input 
-                  className="form-input flex w-full rounded-xl text-white focus:ring-primary/50 border-[#326744] bg-[#193322] h-14 px-4 text-base font-normal text-center transition-all" 
-                  placeholder="0" 
+                  className="flex w-full rounded-2xl text-white focus:ring-2 focus:ring-primary/40 border-white/5 bg-background-dark h-14 px-6 text-base font-bold transition-all outline-none" 
+                  placeholder="0.00" 
                   type="number" 
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
@@ -111,53 +111,58 @@ const PortfolioSetupScreen: React.FC<PortfolioSetupScreenProps> = ({ onBack, onS
 
             <button 
               onClick={handleAddAsset}
-              className="flex w-full cursor-pointer items-center justify-center rounded-xl h-12 px-4 bg-primary text-background-dark gap-2 text-sm font-bold leading-normal transition-all shadow-lg shadow-primary/20"
+              className="flex w-full items-center justify-center rounded-2xl h-14 bg-white/5 border border-white/10 text-white gap-3 text-sm font-black uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95 mt-2"
             >
-              <span className="material-symbols-outlined text-[20px]">add_circle</span>
-              <span className="truncate">Añadir Activo</span>
+              <span className="material-symbols-outlined text-[24px]">add_circle</span>
+              Añadir Activo
             </button>
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col flex-1 bg-[#152b1e] rounded-t-3xl min-h-[400px]">
-          <div className="px-6 pt-6 pb-2 flex justify-between items-center">
-            <h3 className="text-white tracking-tight text-xl font-bold">Acciones Añadidas</h3>
-            <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded-full border border-primary/20">
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-between items-center px-2 mb-2">
+            <h3 className="text-xl font-black text-white tracking-tight">Activos en Cartera</h3>
+            <span className="bg-primary/10 text-primary text-[10px] font-black px-3 py-1 rounded-full border border-primary/20 uppercase">
               {addedAssets.length} activos
             </span>
           </div>
 
-          <div className="flex flex-col px-4 pb-10">
+          <div className="grid grid-cols-1 gap-3">
             {addedAssets.map(asset => (
-              <div key={asset.id} className="flex items-center justify-between p-4 border-b border-slate-700/50 hover:bg-[#1a3525] transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#23482f] text-white font-bold text-sm">
+              <div key={asset.id} className="flex items-center justify-between p-6 bg-surface-dark/20 rounded-[2rem] border border-white/5 hover:border-primary/20 transition-all group">
+                <div className="flex items-center gap-5">
+                  <div className="w-12 h-12 rounded-full bg-background-dark flex items-center justify-center text-white font-black text-sm border border-white/5">
                     {asset.symbol.substring(0, 2)}
                   </div>
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
-                      <p className="text-white text-base font-bold leading-tight">{asset.symbol}</p>
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${asset.market === 'US' ? 'bg-blue-900/30 text-blue-300' : 'bg-sky-900/30 text-sky-300'}`}>
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <p className="text-white text-lg font-black leading-none">{asset.symbol}</p>
+                      <span className="px-2 py-0.5 rounded-lg text-[9px] font-black bg-white/10 text-gray-400 uppercase tracking-widest">
                         {asset.market}
                       </span>
                     </div>
-                    <p className="text-[#92c9a4] text-xs font-medium">{asset.name}</p>
+                    <p className="text-gray-500 text-[10px] font-bold uppercase mt-1 tracking-wider">{asset.name}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-6">
                   <div className="text-right">
-                    <p className="text-white text-base font-bold leading-tight">{asset.quantity}</p>
-                    <p className="text-slate-500 text-xs">acciones</p>
+                    <p className="text-white text-xl font-black leading-none tabular-nums">{asset.quantity}</p>
+                    <p className="text-gray-500 text-[9px] font-bold uppercase tracking-widest mt-1">acciones</p>
                   </div>
                   <button 
                     onClick={() => handleDelete(asset.id)}
-                    className="size-8 flex items-center justify-center rounded-full text-red-500 hover:bg-red-500/10 transition-colors"
+                    className="w-10 h-10 flex items-center justify-center rounded-full text-red-500/40 hover:text-red-500 hover:bg-red-500/10 transition-all"
                   >
-                    <span className="material-symbols-outlined text-[20px]">delete</span>
+                    <span className="material-symbols-outlined text-[22px]">delete</span>
                   </button>
                 </div>
               </div>
             ))}
+            {addedAssets.length === 0 && (
+              <div className="p-12 text-center border-2 border-dashed border-white/5 rounded-[2.5rem]">
+                <p className="text-gray-500 text-sm font-bold uppercase tracking-widest italic">Tu cartera está vacía</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
